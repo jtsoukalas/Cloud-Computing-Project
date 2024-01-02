@@ -1,7 +1,7 @@
 from flask import Flask
+from library.controller import endpoints
 
 app = Flask(__name__)
 
-
-if __name__ == '__main__':
-    app.run()
+app.register_blueprint(endpoints)
+app.run()

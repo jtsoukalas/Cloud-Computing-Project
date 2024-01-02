@@ -8,12 +8,12 @@ import _thread
 import multiprocessing
 import psutil
 
-wikipedia_urls_path = "https://drive.google.com/file/d/1MhnanOUu8gGd_NpkwLGzZFLZ8KezfcOt/view?usp=share_link"
-positive_words_path = "gdrive/My Drive/Lessons/Cloud Infrastructure Management/Exercise/positive_words.txt"
-negative_words_path = "gdrive/My Drive/Lessons/Cloud Infrastructure Management/Exercise/negative_words.txt"
-file = open(wikipedia_urls_path, "r")
-file_content = file.read()
-articles_urls = file_content.split('\n')
+# wikipedia_urls_path = "https://drive.google.com/file/d/1MhnanOUu8gGd_NpkwLGzZFLZ8KezfcOt/view?usp=share_link"
+positive_words_path = "https://drive.google.com/file/d/1eIavTxcKx73jOQbZc_-zNxf61zUk8xgD/view"
+negative_words_path = "https://drive.google.com/file/d/1sOA5H9CZeXsXWkAOlYaufnYAn_55mpmg/view"
+# file = open(wikipedia_urls_path, "r")
+# file_content = file.read()
+# articles_urls = file_content.split('\n')
 
 
 def article_scraper(url):
@@ -55,10 +55,10 @@ def monitor_CPU_Ram():
                                           psutil.cpu_percent(interval=1.0, percpu=True)))
 
 
-mem = psutil.virtual_memory()
-print("Nuber of CPUs: ", psutil.cpu_count(), " Total physical memory", str(int(mem.total / 1024 ** 2)), "MB")
-start_time = time.time()
-for i in range(100):
-    print("%s : %s" % article_sentiment_analysis(i))
-    monitor_CPU_Ram()
-print("Execution time: ", str((time.time() - start_time)))
+# mem = psutil.virtual_memory()
+# print("Nuber of CPUs: ", psutil.cpu_count(), " Total physical memory", str(int(mem.total / 1024 ** 2)), "MB")
+# start_time = time.time()
+# for i in range(100):
+#     print("%s : %s" % article_sentiment_analysis(i))
+#     monitor_CPU_Ram()
+# print("Execution time: ", str((time.time() - start_time)))
