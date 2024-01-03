@@ -9,16 +9,11 @@ import multiprocessing
 import psutil
 import os
 
-# wikipedia_urls_path = "https://drive.google.com/file/d/1MhnanOUu8gGd_NpkwLGzZFLZ8KezfcOt/view?usp=share_link"
 positive_words_path = "./assets/positive_words.txt"
 negative_words_path = "./assets/negative_words.txt"
 script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
 abs_positive_file_path = os.path.join(script_dir, positive_words_path)
 abs_negative_file_path = os.path.join(script_dir, negative_words_path)
-# file = open(wikipedia_urls_path, "r")
-# file_content = file.read()
-# articles_urls = file_content.split('\n')
-
 
 def article_scraper(url):
     response = requests.get(url)
