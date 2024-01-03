@@ -7,10 +7,14 @@ import threading
 import _thread
 import multiprocessing
 import psutil
+import os
 
 # wikipedia_urls_path = "https://drive.google.com/file/d/1MhnanOUu8gGd_NpkwLGzZFLZ8KezfcOt/view?usp=share_link"
-positive_words_path = "https://drive.google.com/file/d/1eIavTxcKx73jOQbZc_-zNxf61zUk8xgD/view"
-negative_words_path = "https://drive.google.com/file/d/1sOA5H9CZeXsXWkAOlYaufnYAn_55mpmg/view"
+positive_words_path = "./assets/positive_words.txt"
+negative_words_path = "./assets/negative_words.txt"
+script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+abs_positive_file_path = os.path.join(script_dir, positive_words_path)
+abs_negative_file_path = os.path.join(script_dir, negative_words_path)
 # file = open(wikipedia_urls_path, "r")
 # file_content = file.read()
 # articles_urls = file_content.split('\n')
@@ -36,18 +40,19 @@ def pos_neg_words(path_pos, path_neg):
     return lpositive_words, lnegative_words
 
 
-def article_sentiment_analysis(num_article):
-    lpos_words, lneg_words = pos_neg_words(positive_words_path, negative_words_path)
-    article_words = article_scraper(articles_urls[num_article])
+def article_sentiment_analysis(url):
+    lpos_words, lneg_words = pos_neg_words(abs_positive_file_path, abs_negative_file_path)
+    article_words = article_scraper(url)
     spos_words, sneg_words, sarticle_words = set(lpos_words), set(lneg_words), set(article_words)
     num_pos_words = len(spos_words.intersection(sarticle_words))
     num_neg_words = len(sneg_words.intersection(sarticle_words))
     # print(num_pos_words,num_neg_words, end=" ")
-    if num_pos_words == num_neg_words or num_pos_words + 1 == num_neg_words or num_pos_words == num_neg_words + 1: return \
-    articles_urls[num_article].split("/")[-1], "neutral"
-    return (articles_urls[num_article].split("/")[-1], "positive") if num_pos_words > num_neg_words else (
-    articles_urls[num_article].split("/")[-1], "negative")
+    if num_pos_words == num_neg_words or num_pos_words + 1 == num_neg_words or num_pos_words == num_neg_words + 1:
+        return url.split("/")[-1], "neutral"
+    if num_pos_words > num_neg_words:
+        return url.split("/")[-1], "positive"
 
+    return url.split("/")[-1], "negative"
 
 def monitor_CPU_Ram():
     mem = psutil.virtual_memory()
