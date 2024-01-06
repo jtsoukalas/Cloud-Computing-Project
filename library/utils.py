@@ -1,10 +1,7 @@
 import urllib.request
 import bs4
-import concurrent.futures
 import requests
-import threading
-import _thread
-import multiprocessing
+
 import os
 import psutil
 import time
@@ -48,6 +45,9 @@ def article_sentiment_analysis(url):
         return url.split("/")[-1], "positive"
 
     return url.split("/")[-1], "negative"
+
+def article_sentiment_analysis_thread(url, response, index):
+    response[index] = article_sentiment_analysis(url)
 
 def monitor_CPU_Ram():
     mem = psutil.virtual_memory()
