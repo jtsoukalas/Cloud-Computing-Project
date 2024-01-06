@@ -1,13 +1,13 @@
 import urllib.request
-import time
 import bs4
 import concurrent.futures
 import requests
 import threading
 import _thread
 import multiprocessing
-import psutil
 import os
+import psutil
+import time
 
 positive_words_path = "./assets/positive_words.txt"
 negative_words_path = "./assets/negative_words.txt"
@@ -54,11 +54,8 @@ def monitor_CPU_Ram():
     print("{}: Memory: {} CPU: {}".format(time.ctime(time.time()), mem.percent,
                                           psutil.cpu_percent(interval=1.0, percpu=True)))
 
+def mem_stats():
+    mem = psutil.virtual_memory()
+    print("Nuber of CPUs: ", psutil.cpu_count(), " Total physical memory", str(int(mem.total / 1024 ** 2)), "MB")
+    return time.time()
 
-# mem = psutil.virtual_memory()
-# print("Nuber of CPUs: ", psutil.cpu_count(), " Total physical memory", str(int(mem.total / 1024 ** 2)), "MB")
-# start_time = time.time()
-# for i in range(100):
-#     print("%s : %s" % article_sentiment_analysis(i))
-#     monitor_CPU_Ram()
-# print("Execution time: ", str((time.time() - start_time)))
