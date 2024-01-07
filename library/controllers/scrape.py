@@ -89,17 +89,7 @@ def article_sentiment_analysis_endpoint_num_multi():
         urls = p.map(requests.get, ["https://en.wikipedia.org/wiki/Special:Random" for i in range(int(num))])
         response = p.map(article_sentiment_analysis_mem, [url.url for url in urls])
 
-    total_mem_used = 0
-    total_cpu = 0
-
-    for i in range(len(response)):
-        total_mem_used += response[i][2]
-        total_cpu += response[i][3]
-        response[i] = response[i][:2]
-
-    execution_time = str((time.time() - start_time))
-    return {"response": escape(response), "time": execution_time, "cpu_count": cpu_count, "total_mem": total_mem,
-            "average_mem": total_mem_used / int(num), "average_cpu_percentage": total_cpu / int(num)}
+    return return_result(cpu_count, num, response, start_time, total_mem)
 
 @scrape.route('/scrape_num_multi_thread', methods=['GET'])
 def article_sentiment_analysis_endpoint_num_multi_thread():
@@ -122,17 +112,7 @@ def article_sentiment_analysis_endpoint_num_multi_thread():
     for thread in threads:
         thread.join()
 
-    total_mem_used = 0
-    total_cpu = 0
-
-    for i in range(len(response)):
-        total_mem_used += response[i][2]
-        total_cpu += response[i][3]
-        response[i] = response[i][:2]
-
-    execution_time = str((time.time() - start_time))
-    return {"response": escape(response), "time": execution_time, "cpu_count": cpu_count, "total_mem": total_mem,
-            "average_mem": total_mem_used / int(num), "average_cpu_percentage": total_cpu / int(num)}
+    return return_result(cpu_count, num, response, start_time, total_mem)
 
 @scrape.route('/scrape_num_multi_thread_2', methods=['GET'])
 def article_sentiment_analysis_endpoint_num_multi_thread_lock():
@@ -151,20 +131,7 @@ def article_sentiment_analysis_endpoint_num_multi_thread_lock():
     for i in range(int(num)):
         _thread.start_new_thread(article_sentiment_analysis_thread, (urls[i].url, response, i))
 
-    while None in response:
-        pass
-
-    total_mem_used = 0
-    total_cpu = 0
-
-    for i in range(len(response)):
-        total_mem_used += response[i][2]
-        total_cpu += response[i][3]
-        response[i] = response[i][:2]
-
-    execution_time = str((time.time() - start_time))
-    return {"response": escape(response), "time": execution_time, "cpu_count": cpu_count, "total_mem": total_mem,
-            "average_mem": total_mem_used / int(num), "average_cpu_percentage": total_cpu / int(num)}
+    return return_result(cpu_count, num, response, start_time, total_mem)
 
 @scrape.route('/scrape_num_multi_thread_3', methods=['GET'])
 def article_sentiment_analysis_endpoint_num_multi_thread_lock_2():
@@ -184,17 +151,18 @@ def article_sentiment_analysis_endpoint_num_multi_thread_lock_2():
         for i in range(int(num)):
             executor.submit(article_sentiment_analysis_thread, urls[i].url, response, i)
 
+    return return_result(cpu_count, num, response, start_time, total_mem)
+
+
+def return_result(cpu_count, num, response, start_time, total_mem):
     while None in response:
         pass
-
     total_mem_used = 0
     total_cpu = 0
-
     for i in range(len(response)):
         total_mem_used += response[i][2]
         total_cpu += response[i][3]
         response[i] = response[i][:2]
-
     execution_time = str((time.time() - start_time))
     return {"response": escape(response), "time": execution_time, "cpu_count": cpu_count, "total_mem": total_mem,
             "average_mem": total_mem_used / int(num), "average_cpu_percentage": total_cpu / int(num)}
