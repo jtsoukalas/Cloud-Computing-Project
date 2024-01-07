@@ -47,15 +47,34 @@ def article_sentiment_analysis(url):
     return url.split("/")[-1], "negative"
 
 def article_sentiment_analysis_thread(url, response, index):
-    response[index] = article_sentiment_analysis(url)
+    response[index] = article_sentiment_analysis_mem(url)
 
-def monitor_CPU_Ram():
+def article_sentiment_analysis_mem(url):
+    lpos_words, lneg_words = pos_neg_words(abs_positive_file_path, abs_negative_file_path)
+    article_words = article_scraper(url)
+    spos_words, sneg_words, sarticle_words = set(lpos_words), set(lneg_words), set(article_words)
+    num_pos_words = len(spos_words.intersection(sarticle_words))
+    num_neg_words = len(sneg_words.intersection(sarticle_words))
+    # print(num_pos_words,num_neg_words, end=" ")
+
+    mem_used, cpu_percent = monitor_cpu_ram()
+    cpu_percent = sum(cpu_percent) / len(cpu_percent)
+
+    if num_pos_words == num_neg_words or num_pos_words + 1 == num_neg_words or num_pos_words == num_neg_words + 1:
+        return url.split("/")[-1], "neutral", mem_used, cpu_percent
+    if num_pos_words > num_neg_words:
+        return url.split("/")[-1], "positive", mem_used, cpu_percent
+
+    return url.split("/")[-1], "negative", mem_used, cpu_percent
+
+def monitor_cpu_ram():
     mem = psutil.virtual_memory()
-    print("{}: Memory: {} CPU: {}".format(time.ctime(time.time()), mem.percent,
-                                          psutil.cpu_percent(interval=1.0, percpu=True)))
+    # print("{}: Memory: {} CPU: {}".format(time.ctime(time.time()), mem.percent,
+    #                                      psutil.cpu_percent(interval=1.0, percpu=True)))
+    return mem.percent, psutil.cpu_percent(interval=1.0, percpu=True)
 
 def mem_stats():
     mem = psutil.virtual_memory()
-    print("Nuber of CPUs: ", psutil.cpu_count(), " Total physical memory", str(int(mem.total / 1024 ** 2)), "MB")
-    return time.time()
+    # print("Nuber of CPUs: ", psutil.cpu_count(), " Total physical memory", str(int(mem.total / 1024 ** 2)), "MB")
+    return time.time(), psutil.cpu_count(), mem.total / 1024 ** 2
 
