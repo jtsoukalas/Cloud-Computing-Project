@@ -8,9 +8,9 @@ import threading
 import _thread
 import concurrent.futures
 
-endpoints = Blueprint('endpoints', __name__)
+scrape = Blueprint('scrape', __name__)
 
-@endpoints.route('/scrape', methods=['GET'])
+@scrape.route('/scrape', methods=['GET'])
 def article_sentiment_analysis_endpoint():
     url = request.args.get('url')
 
@@ -22,7 +22,7 @@ def article_sentiment_analysis_endpoint():
     return {"response": escape(response), "time": execution_time}
 
 # endpoint for an array of urls
-@endpoints.route('/scrape_array', methods=['GET'])
+@scrape.route('/scrape_array', methods=['GET'])
 def article_sentiment_analysis_endpoint_array():
     urls = request.args.get('urls')
     urls = urls.replace('"', '')
@@ -42,7 +42,7 @@ def article_sentiment_analysis_endpoint_array():
     execution_time = str((time.time() - start_time))
     return {"response": escape(response), "time": execution_time}
 
-@endpoints.route('/scrape_num', methods=['GET'])
+@scrape.route('/scrape_num', methods=['GET'])
 def article_sentiment_analysis_endpoint_num():
     num = request.args.get('amount')
     # request from https://en.wikipedia.org/wiki/Special:Random amount of times
@@ -57,7 +57,7 @@ def article_sentiment_analysis_endpoint_num():
     execution_time = str((time.time() - start_time))
     return {"response": escape(response), "time": execution_time}
 
-@endpoints.route('/scrape_num_multi', methods=['GET'])
+@scrape.route('/scrape_num_multi', methods=['GET'])
 def article_sentiment_analysis_endpoint_num_multi():
     num = request.args.get('amount')
     pool_num = int(request.args.get('pool_num'))
@@ -67,14 +67,14 @@ def article_sentiment_analysis_endpoint_num_multi():
     response = []
 
     with Pool(pool_num) as p:
-        urls = p.map(requests.get, ["https://en.wikipedia.org/wiki/Special:Random" for i in range(int(num))] )
+        urls = p.map(requests.get, ["https://en.wikipedia.org/wiki/Special:Random" for i in range(int(num))])
         response = p.map(article_sentiment_analysis, [url.url for url in urls])
         monitor_CPU_Ram()
 
     execution_time = str((time.time() - start_time))
     return {"response": escape(response), "time": execution_time}
 
-@endpoints.route('/scrape_num_multi_thread', methods=['GET'])
+@scrape.route('/scrape_num_multi_thread', methods=['GET'])
 def article_sentiment_analysis_endpoint_num_multi_thread():
     num = request.args.get('amount')
     # request from https://en.wikipedia.org/wiki/Special:Random amount of times
@@ -98,7 +98,7 @@ def article_sentiment_analysis_endpoint_num_multi_thread():
     execution_time = str((time.time() - start_time))
     return {"response": escape(response), "time": execution_time}
 
-@endpoints.route('/scrape_num_multi_thread_2', methods=['GET'])
+@scrape.route('/scrape_num_multi_thread_2', methods=['GET'])
 def article_sentiment_analysis_endpoint_num_multi_thread_lock():
     num = request.args.get('amount')
 
@@ -121,7 +121,7 @@ def article_sentiment_analysis_endpoint_num_multi_thread_lock():
     execution_time = str((time.time() - start_time))
     return {"response": escape(response), "time": execution_time}
 
-@endpoints.route('/scrape_num_multi_thread_3', methods=['GET'])
+@scrape.route('/scrape_num_multi_thread_3', methods=['GET'])
 def article_sentiment_analysis_endpoint_num_multi_thread_lock_2():
     num = request.args.get('amount')
 
