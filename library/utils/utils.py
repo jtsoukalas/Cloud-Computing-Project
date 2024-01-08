@@ -6,8 +6,8 @@ import os
 import psutil
 import time
 
-positive_words_path = "./assets/positive_words.txt"
-negative_words_path = "./assets/negative_words.txt"
+positive_words_path = "../assets/positive_words.txt"
+negative_words_path = "../assets/negative_words.txt"
 script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
 abs_positive_file_path = os.path.join(script_dir, positive_words_path)
 abs_negative_file_path = os.path.join(script_dir, negative_words_path)

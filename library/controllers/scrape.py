@@ -1,6 +1,8 @@
 from flask import Blueprint, request
 from markupsafe import escape
-from library.utils import article_sentiment_analysis, monitor_cpu_ram, mem_stats, article_sentiment_analysis_thread, \
+
+from library.utils.multiprocessing import multiproc, concurrent_func
+from library.utils.utils import article_sentiment_analysis, monitor_cpu_ram, mem_stats, article_sentiment_analysis_thread, \
     article_sentiment_analysis_mem
 import requests
 import time
@@ -79,15 +81,10 @@ def article_sentiment_analysis_endpoint_num():
 @scrape.route('/scrape_num_multi', methods=['GET'])
 def article_sentiment_analysis_endpoint_num_multi():
     num = request.args.get('amount')
-    pool_num = int(request.args.get('pool_num'))
     # request from https://en.wikipedia.org/wiki/Special:Random amount of times
     start_time, cpu_count, total_mem = mem_stats()
 
-    response = []
-
-    with Pool(pool_num) as p:
-        urls = p.map(requests.get, ["https://en.wikipedia.org/wiki/Special:Random" for i in range(int(num))])
-        response = p.map(article_sentiment_analysis_mem, [url.url for url in urls])
+    response = multiproc(article_sentiment_analysis_mem, num)
 
     return return_result(cpu_count, num, response, start_time, total_mem)
 
@@ -141,15 +138,7 @@ def article_sentiment_analysis_endpoint_num_multi_thread_lock_2():
 
     start_time, cpu_count, total_mem = mem_stats()
 
-    response = [None] * int(num)
-
-    urls = []
-    for i in range(int(num)):
-        urls.append(requests.get("https://en.wikipedia.org/wiki/Special:Random"))
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        for i in range(int(num)):
-            executor.submit(article_sentiment_analysis_thread, urls[i].url, response, i)
+    response = concurrent_func(article_sentiment_analysis_mem, num)
 
     return return_result(cpu_count, num, response, start_time, total_mem)
 
