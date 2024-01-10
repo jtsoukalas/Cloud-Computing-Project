@@ -7,7 +7,7 @@ import time
 class Utils:
     positive_words_path = "../assets/positive_words.txt"
     negative_words_path = "../assets/negative_words.txt"
-    script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+    script_dir = os.path.dirname(__file__)  #
     abs_positive_file_path = os.path.join(script_dir, positive_words_path)
     abs_negative_file_path = os.path.join(script_dir, negative_words_path)
 
@@ -36,40 +36,30 @@ class Utils:
         return found_positive_words, found_negative_words
 
     @staticmethod
-    def article_sentiment_analysis(url, monitor=False):
+    def article_sentiment_analysis(url):
         found_pos_words, found_neg_words = Utils.pos_neg_words(Utils.abs_positive_file_path, Utils.abs_negative_file_path)
         article_words = Utils.article_scraper(url)
         spos_words, sneg_words, sarticle_words = set(found_pos_words), set(found_neg_words), set(article_words)
         num_pos_words = len(spos_words.intersection(sarticle_words))
         num_neg_words = len(sneg_words.intersection(sarticle_words))
 
-        mem_used, cpu_percent = 0, 0
-        if monitor:
-            mem_used, cpu_percent = Utils.monitor_cpu_ram()
-            cpu_percent = sum(cpu_percent) / len(cpu_percent)
-            if num_pos_words == num_neg_words or num_pos_words + 1 == num_neg_words or num_pos_words == num_neg_words + 1:
-                return url.split("/")[-1], "neutral", mem_used, cpu_percent
-            if num_pos_words > num_neg_words:
-                return url.split("/")[-1], "positive", mem_used, cpu_percent
-
-            return url.split("/")[-1], "negative", mem_used, cpu_percent
-
+        mem_used, cpu_percent = Utils.monitor_cpu_ram()
+        cpu_percent = sum(cpu_percent) / len(cpu_percent)
         if num_pos_words == num_neg_words or num_pos_words + 1 == num_neg_words or num_pos_words == num_neg_words + 1:
-            return url.split("/")[-1], "neutral"
+            return url.split("/")[-1], "neutral", mem_used, cpu_percent
         if num_pos_words > num_neg_words:
-            return url.split("/")[-1], "positive"
+            return url.split("/")[-1], "positive", mem_used, cpu_percent
 
-        return url.split("/")[-1], "negative"
+        return url.split("/")[-1], "negative", mem_used, cpu_percent
 
     @staticmethod
     def article_sentiment_analysis_thread(url, response, index):
-        response[index] = Utils.article_sentiment_analysis(url, True)
+        response[index] = Utils.article_sentiment_analysis(url)
 
-    # TODO Call this once at the start and then at the end and subtract the difference to get the total cpu usage between the two calls
     @staticmethod
     def monitor_cpu_ram():
         mem = psutil.virtual_memory()
-        return mem.percent, psutil.cpu_percent(interval=1.0, percpu=True)
+        return mem.percent, psutil.cpu_percent(interval=None, percpu=True)
 
     @staticmethod
     def mem_stats():
