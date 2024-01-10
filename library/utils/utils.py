@@ -1,6 +1,5 @@
 import bs4
 import requests
-
 import os
 import psutil
 import time
@@ -13,10 +12,11 @@ class Utils:
     abs_negative_file_path = os.path.join(script_dir, negative_words_path)
 
     cashed_urls = []
-    cashed_urls_num = 50
+    cashed_urls_num = 20
 
     @staticmethod
     def article_scraper(url):
+        textual_data = ""
         response = requests.get(url)
         if response is not None:
             html = bs4.BeautifulSoup(response.text, 'html.parser')
@@ -65,17 +65,15 @@ class Utils:
     def article_sentiment_analysis_thread(url, response, index):
         response[index] = Utils.article_sentiment_analysis(url, True)
 
+    # TODO Call this once at the start and then at the end and subtract the difference to get the total cpu usage between the two calls
     @staticmethod
     def monitor_cpu_ram():
         mem = psutil.virtual_memory()
-        # print("{}: Memory: {} CPU: {}".format(time.ctime(time.time()), mem.percent,
-        #                                      psutil.cpu_percent(interval=1.0, percpu=True)))
         return mem.percent, psutil.cpu_percent(interval=1.0, percpu=True)
 
     @staticmethod
     def mem_stats():
         mem = psutil.virtual_memory()
-        # print("Nuber of CPUs: ", psutil.cpu_count(), " Total physical memory", str(int(mem.total / 1024 ** 2)), "MB")
         return time.time(), psutil.cpu_count(), mem.total / 1024 ** 2
 
     @staticmethod
@@ -91,3 +89,17 @@ class Utils:
         if num > Utils.cashed_urls_num:
             return None
         return Utils.cashed_urls[0:num]
+
+    @staticmethod
+    def return_result(cpu_count, num, response, start_time, total_mem):
+        while None in response:
+            pass
+        total_mem_used = 0
+        total_cpu = 0
+        for i in range(len(response)):
+            total_mem_used += response[i][2]
+            total_cpu += response[i][3]
+            response[i] = response[i][:2]
+        execution_time = str((time.time() - start_time))
+        return {"response": response, "time": execution_time, "cpu_count": cpu_count, "total_mem": total_mem,
+                "average_mem": total_mem_used / int(num), "average_cpu_percentage": total_cpu / int(num)}

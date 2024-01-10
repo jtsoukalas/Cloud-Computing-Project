@@ -1,31 +1,22 @@
 from multiprocessing import Pool
 import concurrent.futures
-import requests
 
 class Multiprocessing:
     pool_size = 4
-    __pool = {}
+    pool = Pool(pool_size)
 
-    def __init__(self):
-        self.__pool = Pool(self.pool_size)
-
-    def multiproc(self, func, args):
-        response = []
-
-        # also insert args for func, all urls and True
-        response = self.__pool.starmap(func, args)
+    @staticmethod
+    def multiproc(func, args):
+        response = Multiprocessing.pool.starmap(func, args)
 
         return response
 
     @staticmethod
-    def concurrent_func(func, num):
-        response = [None] * int(num)
-        urls = []
-        for i in range(int(num)):
-            urls.append(requests.get("https://en.wikipedia.org/wiki/Special:Random"))
+    def concurrent_func(func, args):
+        response = [None] * len(args)
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            future = [executor.submit(func, url.url, True) for url in urls]
+        with concurrent.futures.ThreadPoolExecutor(max_workers=Multiprocessing.pool_size) as executor:
+            future = [executor.submit(func, url, True) for url in args]
             for i, f in enumerate(concurrent.futures.as_completed(future)):
                 response[i] = f.result()
 
