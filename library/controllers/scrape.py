@@ -39,7 +39,7 @@ def article_sentiment_analysis_endpoint_num_multi():
 
     response = Multiprocessing.multiproc(Utils.article_sentiment_analysis, [url for url in urls])
 
-    return Utils.return_result(num, response, start_time)
+    return Utils.return_result(num, response, start_time, Multiprocessing.pool_size)
 # TODO possible wrong cpu calculation
 @scrape.route('/scrape_num_threading', methods=['GET'])
 def article_sentiment_analysis_endpoint_num_multi_thread():
@@ -60,10 +60,12 @@ def article_sentiment_analysis_endpoint_num_multi_thread():
         threads.append(t)
         t.start()
 
+    active = len(threads)
+
     for thread in threads:
         thread.join()
 
-    return Utils.return_result(num, response, start_time)
+    return Utils.return_result(num, response, start_time, active)
 
 @scrape.route('/scrape_num_thread', methods=['GET'])
 def article_sentiment_analysis_endpoint_num_multi_thread_lock():
@@ -81,7 +83,7 @@ def article_sentiment_analysis_endpoint_num_multi_thread_lock():
     for i in range(int(num)):
         _thread.start_new_thread(Utils.article_sentiment_analysis_thread, (urls[i], response, i))
 
-    return Utils.return_result(num, response, start_time)
+    return Utils.return_result(num, response, start_time, len(urls))
 
 @scrape.route('/scrape_num_concur', methods=['GET'])
 def article_sentiment_analysis_endpoint_num_multi_thread_lock_2():
@@ -96,4 +98,4 @@ def article_sentiment_analysis_endpoint_num_multi_thread_lock_2():
 
     response = Multiprocessing.concurrent_func(Utils.article_sentiment_analysis, urls)
 
-    return Utils.return_result(num, response, start_time)
+    return Utils.return_result(num, response, start_time, Multiprocessing.pool_size)

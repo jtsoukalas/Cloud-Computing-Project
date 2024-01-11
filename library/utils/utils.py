@@ -70,7 +70,8 @@ class Utils:
     @staticmethod
     def cashing_urls():
         with Pool(10) as p:
-            responses = p.map(requests.get, ["https://en.wikipedia.org/wiki/Special:Random" for i in range(Utils.cashed_urls_num)])
+            responses = p.map(requests.get, ["https://en.wikipedia.org/wiki/Special:Random"
+                                             for i in range(Utils.cashed_urls_num)])
 
         for response in responses:
             Utils.cashed_urls.append(response.url)
@@ -83,7 +84,7 @@ class Utils:
         return Utils.cashed_urls[0:num]
 
     @staticmethod
-    def return_result(num, response, start_time):
+    def return_result(num, response, start_time, thread_workers_num=0):
         cpu_count, total_mem = Utils.mem_stats()
         while None in response:
             pass
@@ -95,4 +96,5 @@ class Utils:
             response[i] = response[i][:2]
         execution_time = str((time.time() - start_time))
         return {"response": response, "time": execution_time, "cpu_count": cpu_count, "total_mem": total_mem,
-                "average_mem": total_mem_used / int(num), "average_cpu_percentage": total_cpu / int(num)}
+                "average_mem": total_mem_used / int(num), "average_cpu_percentage": total_cpu / int(num),
+                "thread_workers_num": thread_workers_num}
