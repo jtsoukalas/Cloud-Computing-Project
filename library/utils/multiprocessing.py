@@ -3,7 +3,6 @@ import concurrent.futures
 
 from library.utils.utils import Utils
 
-
 class Multiprocessing:
     pool_size = 4
     pool = Pool(pool_size)

@@ -3,16 +3,17 @@ import requests
 import os
 import psutil
 import time
+from multiprocessing import Pool
 
 class Utils:
     positive_words_path = "../assets/positive_words.txt"
     negative_words_path = "../assets/negative_words.txt"
-    script_dir = os.path.dirname(__file__)  #
+    script_dir = os.path.dirname(__file__)
     abs_positive_file_path = os.path.join(script_dir, positive_words_path)
     abs_negative_file_path = os.path.join(script_dir, negative_words_path)
 
     cashed_urls = []
-    cashed_urls_num = 20
+    cashed_urls_num = 1000
 
     @staticmethod
     def article_scraper(url):
@@ -20,7 +21,6 @@ class Utils:
         response = requests.get(url)
         if response is not None:
             html = bs4.BeautifulSoup(response.text, 'html.parser')
-            title = html.select("#firstHeading")[0].text
             paragraphs = html.select("p")
             textual_data = " ".join([para.text for para in paragraphs[0:5]])
         return textual_data.split(" ")
@@ -37,11 +37,12 @@ class Utils:
 
     @staticmethod
     def article_sentiment_analysis(url):
-        found_pos_words, found_neg_words = Utils.pos_neg_words(Utils.abs_positive_file_path, Utils.abs_negative_file_path)
+        found_pos_words, found_neg_words = Utils.pos_neg_words(Utils.abs_positive_file_path,
+                                                               Utils.abs_negative_file_path)
         article_words = Utils.article_scraper(url)
-        spos_words, sneg_words, sarticle_words = set(found_pos_words), set(found_neg_words), set(article_words)
-        num_pos_words = len(spos_words.intersection(sarticle_words))
-        num_neg_words = len(sneg_words.intersection(sarticle_words))
+        set_pos_words, set_neg_words, set_article_words = set(found_pos_words), set(found_neg_words), set(article_words)
+        num_pos_words = len(set_pos_words.intersection(set_article_words))
+        num_neg_words = len(set_neg_words.intersection(set_article_words))
 
         mem_used, cpu_percent = Utils.monitor_cpu_ram()
         cpu_percent = sum(cpu_percent) / len(cpu_percent)
@@ -64,14 +65,15 @@ class Utils:
     @staticmethod
     def mem_stats():
         mem = psutil.virtual_memory()
-        return time.time(), psutil.cpu_count(), mem.total / 1024 ** 2
+        return psutil.cpu_count(), mem.total / 1024 ** 2
 
     @staticmethod
     def cashing_urls():
-        for i in range(Utils.cashed_urls_num):
-            url = requests.get("https://en.wikipedia.org/wiki/Special:Random")
-            Utils.cashed_urls.append(url.url)
+        with Pool(10) as p:
+            responses = p.map(requests.get, ["https://en.wikipedia.org/wiki/Special:Random" for i in range(Utils.cashed_urls_num)])
 
+        for response in responses:
+            Utils.cashed_urls.append(response.url)
         print(Utils.cashed_urls_num, 'urls cashed')
 
     @staticmethod
@@ -81,7 +83,8 @@ class Utils:
         return Utils.cashed_urls[0:num]
 
     @staticmethod
-    def return_result(cpu_count, num, response, start_time, total_mem):
+    def return_result(num, response, start_time):
+        cpu_count, total_mem = Utils.mem_stats()
         while None in response:
             pass
         total_mem_used = 0
