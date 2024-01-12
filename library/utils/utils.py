@@ -74,7 +74,10 @@ class Utils:
                                              for i in range(Utils.cashed_urls_num)])
 
         for response in responses:
-            Utils.cashed_urls.append(response.url)
+            if response.url not in Utils.cashed_urls:
+                Utils.cashed_urls.append(response.url)
+            else:
+                Utils.cashed_urls_num -= 1
         print(Utils.cashed_urls_num, 'urls cashed')
 
     @staticmethod

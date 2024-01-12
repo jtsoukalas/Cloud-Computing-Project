@@ -1,10 +1,11 @@
 from multiprocessing import Pool
 import concurrent.futures
-
+import _thread
 from library.utils.utils import Utils
+import threading
 
 class Multiprocessing:
-    pool_size = 4
+    pool_size = 32
     pool = Pool(pool_size)
 
     @staticmethod
