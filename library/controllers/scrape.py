@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from library.utils.multiprocessing import Multiprocessing
 from library.utils.utils import Utils
 import threading
@@ -6,6 +6,46 @@ import _thread
 import time
 
 scrape = Blueprint('scrape', __name__)
+
+@scrape.route('/scrape', methods=['GET'])
+def article_sentiment_analysis_endpoint():
+    start_time = time.time()
+
+    url = request.args.get('url')
+
+    response = Utils.article_sentiment_analysis(url)
+
+    return Utils.return_result(1, [response], start_time)
+
+@scrape.route('/scrape_list', methods=['GET'])
+def article_sentiment_analysis_endpoint_multi():
+    start_time = time.time()
+
+    received_urls = []
+    try:
+        # Assuming the incoming data is in JSON format
+        data = request.get_json()
+
+        # Check if 'strings' key exists in the JSON data
+        if 'urls' in data and isinstance(data['urls'], list):
+            received_urls = data['urls']
+        else:
+            return jsonify({"success": False, "message": "Invalid data format. 'strings' key not found or not a list."})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)})
+
+    response = []
+
+    Utils.monitor_cpu_ram()
+
+    for url in received_urls:
+        response.append(Utils.article_sentiment_analysis(url))
+
+    return Utils.return_result(len(received_urls), response, start_time, Multiprocessing.pool_size)
+
+@scrape.route('/get_cashed', methods=['GET'])
+def get_cashed_urls():
+    return Utils.cashed_urls
 
 @scrape.route('/scrape_num', methods=['GET'])
 def article_sentiment_analysis_endpoint_num():
@@ -40,6 +80,7 @@ def article_sentiment_analysis_endpoint_num_multi():
     response = Multiprocessing.multiproc(Utils.article_sentiment_analysis, [url for url in urls])
 
     return Utils.return_result(num, response, start_time, Multiprocessing.pool_size)
+
 # TODO possible wrong cpu calculation
 @scrape.route('/scrape_num_threading', methods=['GET'])
 def article_sentiment_analysis_endpoint_num_multi_thread():
