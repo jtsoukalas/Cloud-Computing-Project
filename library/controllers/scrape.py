@@ -45,7 +45,7 @@ def article_sentiment_analysis_endpoint_multi():
 
 @scrape.route('/get_cashed', methods=['GET'])
 def get_cashed_urls():
-    return Utils.cashed_urls
+    return jsonify({"urls": Utils.cashed_urls})
 
 @scrape.route('/scrape_num', methods=['GET'])
 def article_sentiment_analysis_endpoint_num():
