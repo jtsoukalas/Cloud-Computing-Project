@@ -20,12 +20,10 @@ def article_sentiment_analysis_endpoint():
 @scrape.route('/scrape_list', methods=['GET'])
 def article_sentiment_analysis_endpoint_multi():
     start_time = time.time()
-
     received_urls = []
     try:
         # Assuming the incoming data is in JSON format
         data = request.get_json()
-
         # Check if 'strings' key exists in the JSON data
         if 'urls' in data and isinstance(data['urls'], list):
             received_urls = data['urls']
@@ -40,7 +38,6 @@ def article_sentiment_analysis_endpoint_multi():
 
     for url in received_urls:
         response.append(Utils.article_sentiment_analysis(url))
-
     return Utils.return_result(len(received_urls), response, start_time, Multiprocessing.pool_size)
 
 @scrape.route('/get_cashed', methods=['GET'])
